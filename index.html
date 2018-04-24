@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	  <title>百度编辑器</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript" charset="utf-8" src="jquery-1.8.0.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="ueditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="ueditor.all.js"> </script>	
+    <script type="text/javascript" charset="utf-8" src="lang/zh-cn/zh-cn.js"></script>
+    <script type="text/javascript" charset="utf-8" src="ueditor.custom.js"></script>
+    
+	<script type="text/javascript" src="wordimport.js"></script>
+ 	<!-- webuploader -->
+    <script src="./third-party/webuploader/webuploader.flashonly.min.js"></script>
+ 	<!-- <script type="text/javascript" src="docparser.js"></script> -->
+ 	
+    <link rel="stylesheet" type="text/css" href="./third-party/webuploader/webuploader.css">
+	<link href="themes/iframe.css" rel="stylesheet" />
+	
+    <link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+	<!--<link rel="stylesheet" type="text/css" href="../../themes/icon.css">-->
+	<!--<link rel="stylesheet" type="text/css" href="../demo.css">-->
+     
+	<script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery-1.8.0.min.js"></script>
+	<script type="text/javascript" src="jquery.easyui.min.js"></script>
+	<script type="text/javascript">	
+		var nowFontSize = 2;//当前字体大中小
+		var viewVersionContent;
+
+		$(function(){
+			var totalW = document.documentElement.clientWidth-20,
+				totalH = document.documentElement.clientHeight-20;
+			var panelH=document.getElementById("tt").style.height=totalH+"px",//编辑器右侧面板的高
+			    panel02H=document.getElementById("panel02").style.height=totalH-62+"px",//001编辑器右侧tabs-panels类的高
+		        rightH=document.getElementById("right").style.height=totalH+"px",//001编辑器右侧栏div的高
+				accessorycontainerH=document.getElementById("accessory-container").style.height=totalH-120+"px";//解决右侧附件面板高度自适应问题
+					
+
+			//实例化，获取稿件参数	
+		   var ue=UE.getEditor('editor',{
+				elementPathEnabled: false,
+				//initialContent:mainContent,
+				//initialFrameWidth: totalW-15,
+				initialFrameHeight: totalH-180,//001已调整
+				UUID: GetQueryString("UUID")==null?'':GetQueryString("UUID"),
+				DocLibID: GetQueryString("DocLibID")==null?'':GetQueryString("DocLibID"), 
+				FVID: GetQueryString("FVID")==null?'':GetQueryString("FVID")
+			})
+
+			
+			renderUploader('uploadbtn',ue);
+			/**拖动调整编辑器大小*/
+			/**var oBox = $("#box")[0], oTop = $("#left")[0], oBottom = $("#right")[0], oLine = $("#line")[0];
+			oLine.onmousedown = function(e) {
+				var disX = (e || event).clientX;
+				oLine.left = oLine.offsetLeft;
+				document.onmousemove = function(e) {  
+					var iT = oLine.left + ((e || event).clientX - disX);
+					var e=e||window.event,tarnameb=e.target||e.srcElement;//??
+					var maxT = oBox.offsetWidth - oLine.offsetWidth-200;
+					oLine.style.margin = 0;
+					iT < 200 && (iT = 200);
+					iT > maxT && (iT = maxT);
+					oLine.style.left = oTop.style.width = iT + "px";
+					oBottom.style.width = oBox.clientWidth - iT + "px";
+					return false
+				};	
+				document.onmouseup = function() {
+					document.onmousemove = null;
+					document.onmouseup = null;	
+					oLine.releaseCapture && oLine.releaseCapture()
+				};
+				oLine.setCapture && oLine.setCapture();
+				return false
+			};
+
+			
+			$("#box").css({"width":totalW+"px","height":(totalH-30)+"px"});
+			$("#left").css({"width":(totalW*0.74+10)+"px"});
+			$("#right").css({"width":(totalW*0.24+5)+"px"});*/
+			//$("#editor").css({"height":(totalH-115)+"px"});	
+			
+		})
+			
+		function doResizeFont(pucl,size,index){
+			//重复点击
+			var fontclass = $(".font_size").eq(index-1).attr("class");
+			if(fontclass.indexOf("select") > -1){
+				return ;
+			}
+			//去掉之前选中的样式 
+			$(".font_size").each(function(i){
+				$(this).removeClass("font_size_select_"+(i+1)).addClass("font_size_"+(i+1));
+			})				
+			$(".font_size").eq(index-1).removeClass("font_size_"+index).addClass("font_size_select_"+index);
+			if(nowFontSize == 1){
+				size -= 4;
+			}
+			if(nowFontSize == 3){
+				size += 4;
+			}
+			nowFontSize = index;	
+			doZoom(pucl,size);	
+		}
+		
+		//字体大中小
+		function doZoom(pucl,size){
+			var fontsize = $(pucl).css("font-size");
+			if( !isNaN(parseInt(fontsize)) ){
+				$(pucl).css("font-size",(parseInt(fontsize)+size)+"px");
+			}else{
+				$(pucl).css("font-size",(16+size)+"px");
+			}
+			for(var i=0;i<pucl.childNodes.length;i++){ 
+				doZoom(pucl.childNodes[i],size); 
+			} 
+		}
+
+		$(function(){
+			$(".f-title").toggle(
+			function () {
+			$(this).next(".f-content").eq(0).slideUp();
+			},
+			function () {
+			$(this).next(".f-content").eq(0).slideDown();
+			});
+			})
+		
+		
+           $("#accessory-container:input:checkbox").each(function() {
+                    if($("this").attr("checked")==true){
+						$("#del-btn").bind("click",function(){
+							$(this).remove();
+							});
+						
+						}
+                });      
+	</script>
+   
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'east',split:true,title:'栏目'" style="width:260px;padding:10px;">
+    <!-- 稿签 -->
+			<div id="right" style="width:98%;">
+				<!-- 001选项卡代码 -->
+              <div id="tt" class="easyui-tabs" style="width:100%;position:absolute;right:0px;">
+		<div title="稿签" style="padding:5px 10px 10px 10px">
+        <div id="tab-title01">稿签</div>
+        
+          <!-- 001折叠栏代码 -->
+	<div id="easyui-accord" class="easyui-accordion" style="width:100%;height:430px;border:none;">
+          <!-- 面板1 -->
+		<div title="基本内容" data-options="iconCls:'icon-ok'" style="overflow:auto;padding:10px 10px 0px 0px;border:none">
+			<form>
+					<div class="f-outer">
+						<span class="f-title">基本内容</span>
+						<div class="f-content">
+							<div class="f-row" style="padding-top:15px;">
+								<span class="f-row-txt">标题：</span>
+								<input type="text" class="form-text" name="title" id="title" />
+							</div>
+							<div class="f-row">
+								<span class="f-row-txt">链接标题</span>
+								<input type="text" class="form-text" name="title" id="title" />
+							</div>
+							<div class="f-row">
+								<span class="f-row-txt">短标题：</span>
+								<input type="text" class="form-text" name="title" id="title" />
+							</div>
+                            <div class="f-row">
+								<span class="f-row-txt">编辑：</span>
+								<input type="text" class="form-text" name="title" id="title" />
+							</div>
+                            <div class="f-row">
+								<span class="f-row-txt">责任编辑</span>
+								<input type="text" class="form-text" name="title" id="title" />
+							</div>
+                             <div class="f-row">
+								<span class="f-row-txt">稿件属性</span>
+                                <select onchange="$('#').({this.value})" style="width:50%;height:28px;line-height:28px;;margin-left:5px;">
+			                           <option value="新闻">新闻</option>
+			                           <option value="财经">财经</option>
+			                           <option value="娱乐">娱乐</option>
+			                           <option value="体育">体育</option>
+		</select>
+							</div>
+                             <div class="">
+								<span class="f-row-txt">摘要</span>
+								<textarea class="form-textarea" name="title" id="title"></textarea>
+							</div>
+                             <div class="">
+								<span class="f-row-txt">精简摘要</span>
+								<textarea class="form-textarea" name="title" id="title"></textarea>
+							</div>
+						</div>
+					</div>
+					
+					
+					
+				</form>
+		</div>
+            <!-- 001面板二 -->
+		<div title="其他" data-options="iconCls:'icon-help'" style="padding:10px 10px 0px 0px;border:none;">
+			<div class="f-outer">
+						<span class="f-title">其他</span>
+						<div class="f-content">
+							<div class="f-row">
+								<span class="f-row-txt">关键字：</span>
+								<input type="text" class="form-text" name="keyword" id="keyword" />
+							</div>
+							<div class="f-row">
+								<span class="f-row-txt">引题：</span>
+								<input type="text" class="form-text" name="subtitle" id="subtitle" />
+							</div>
+							<div class="f-row">
+								<span class="f-row-txt">作者：</span>
+								<input type="text" class="form-text" name="author" id="author" />
+							</div>
+                           <div class="f-row">
+								<span class="f-row-txt">内容链接</span>
+								<input type="text" class="form-text" name="contentlink" id="contentlink" />
+							</div>
+                            <div class="f-row">
+								<span class="f-row-txt">来源链接</span>
+								<input type="text" class="form-text" name="sourcelink" id="sourcelink" />
+							</div>
+						</div>
+					</div>	
+		</div>
+		
+	</div>
+			
+		</div>
+		<div title="附件" style="padding:5px 10px 10px 10px;border:none">
+        <div id="tab-title02">附件</div>
+			
+             <div id="accessory-container" style="width:92%;background-color:#F4F5F7;display:block;padding:10px;">
+             <form>
+             <ul style="list-style:none;">
+             <li> <input type="checkbox" name="child" value="附件1">附件1</input></li> 
+             <li> <input type="checkbox" name="child" value="附件2">附件2</input></li>
+             <li> <input type="checkbox" name="child" value="附件3">附件3</input></li>
+             <li> <input type="checkbox" name="child" value="附件4">附件4</input></li>
+             </ul>
+             <div id="button-box" style="position:absolute;right:10%;bottom:80px;
+">
+            
+             <input id="del-btn" type="button" value="删除"></input>
+             <input id="add-btn" type="button" value="添加"></input>
+         <!-- <script>    
+		$("#accessory-container:input:checkbox").each(function() {
+                    if($("this").attr("checked")==true){
+						$("#del-btn").bind("click",function(){
+							$("this").remove();
+							});
+						
+					if($("input:checkbox").attr("checked")==false){
+						$("#add-btn").bind("click",function(){
+							$("input:eq(0)").attr("checked","true");
+							})
+						}
+						}
+                });
+				
+            </script> -->
+            <script>
+           $('#del-btn').click(function(){
+                var num = 0;
+				$(':checkbox[name=child]').each(function(){
+					if($(this).attr('checked')){
+						$(this).closest('li').remove();
+						num++;
+					}
+				})
+				alert('共删除了【'+num+'】个附件');
+			})
+            </script>
+           <!-- <script>
+            $("#del-btn").bind("click",function(){
+				var num=0;
+				$(':checkbox[name=child]').each(function(){
+					if($(this).attr('checked')){
+						$(this).closest('li').remove();
+						num++;
+						}
+					})
+					alert('共删除了'+num+'个附件');
+				});
+            </script>-->
+             </div>
+              </form>
+             </div>
+			  
+		</div>
+		<div title="稿件管理" style="padding:5px 10px 10px 10px">
+        <div id="tab-title03">稿件管理</div>
+			<form>
+					<div class="f-outer">
+                       
+						<span class="f-title" style="margin-top:10px;">
+                         <input id="txtSearch" name="txtSearch" type="text" autocomplete="true" style="width:70%;height:23px;line-height:23px;float:left;margin-left:5px;"></input>
+                         <span id="do-search">搜索</span>
+                        </span>
+                <div class="tip">
+                </div>
+            
+        
+        <script type="text/javascript">
+            $(function () {
+                var arrUserName = ["新闻", "民生", "体育", "资讯", "财经", "军事", "新闻"];
+                $("#txtSearch").autocomplete(arrUserName,{
+                    minChars: 0, //双击空白文本框时显示全部提示数据
+                    formatItem: function (data, i, total) {
+                        return "<I>" + data[0] + "</I>"; //改变匹配数据显示的格式
+                    },
+                    formatMatch: function (data, i, total) {
+                        return data[0];
+                    },
+                    formatResult: function (data) {
+                        return data[0];
+                    }
+                }).result(SearchCallback); 
+                function SearchCallback(event, data, formatted) {
+                    $(".tip").show().html("您的选择是：" + (!data ? "空" : formatted));
+                }
+            });
+        </script>
+						<div class="f-content">
+							
+							<div id="f-addmanuscript">
+								<ul class="f-addmanuscript-title">
+                                    <li class="f-titile-1">勾选添加稿件</li>
+                                    <li class="f-titile-2">ID</li>
+                                    <li class="f-titile-3">发布日期</li>
+                                                                   
+                                </ul>
+                                <div id="f-addmanuscript-contents">
+                               <table id="tab01">
+	
+	<tr>
+		<td width="20px"><input type="checkbox" name="child"/></td>
+        <td width="70">稿件名称</td>
+		<td width="40px">111</td>
+		<td width="60px">2015/02/26</td>
+	</tr>
+    
+	<tr>
+		<td><input type="checkbox" name="child"/></td>
+        <td>稿件名称</td>
+		<td>111</td>
+		<td>2015/02/26</td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="child"/></td>
+        <td>稿件名称</td>
+		<td>111</td>
+		<td>2015/02/26</td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="child"/></td>
+        <td>稿件名称</td>
+		<td>111</td>
+		<td>2015/02/26</td>
+	</tr>
+    <tr>
+		<td><input type="checkbox" name="child"/></td>
+        <td>稿件名称</td>
+		<td>111</td>
+		<td>2015/02/26</td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="child"/></td>
+        <td>稿件名称</td>
+		<td>111</td>
+		<td>2015/02/26</td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="child"/></td>
+        <td>稿件名称</td>
+		<td>111</td>
+		<td>2015/02/26</td>
+	</tr>
+    
+</table>
+                                </div>
+							</div>
+                            
+                            <div id="f-managemanuscript">
+								<ul>
+                                    <li class="f-titile-4"><span id="pre-btn">上一个</span></li>
+                                    <li class="f-titile-5"><span id="next-btn">下一个</span></li>
+                                    
+                                
+                                </ul>
+                                
+                                <ul class="f-managemanuscript-title">
+                                    <li class="f-titile-7">当前相关稿件</li>
+                                    <li class="f-titile-8">ID</li>
+                                   
+                                
+                                </ul>
+                                <div id="f-managemanuscript-contents">
+                                     <table id="tab02">
+	
+    <tr>
+		<td width="80px"></td>
+		<td width="40px"></td>
+		<td width="40px"></td>
+	</tr>
+	<tr>
+		<td>稿件名称</td>
+		<td>111</td>
+		<td><span name="delete">删除</span></td>
+	</tr>
+	<tr>
+		<td>稿件名称</td>
+		<td>112</td>
+		<td width="40px"><span name="delete">删除</span></td>
+	</tr>
+	<tr>
+		<td>稿件名称</td>
+		<td>113</td>
+		<td width="40px"><span name="delete">删除</span></td>
+	</tr>
+	<tr>
+		<td>稿件名称</td>
+		<td>114</td>
+		<td width="40px"><span name="delete">删除</span></td>
+	</tr>
+    <tr>
+		<td>稿件名称</td>
+		<td>115</td>
+		<td width="40px"><span name="delete">删除</span></td>
+	</tr>
+	<tr>
+		<td>稿件名称</td>
+		<td>116</td>
+		<td width="40px"><span name="delete">删除</span></td>
+	</tr>
+	<tr>
+		<td>稿件名称</td>
+		<td>117</td>
+		<td width="40px"><span name="delete">删除</span></td>
+	</tr>
+   
+</table>
+                                
+                                </div>
+							</div>
+							
+                        <script>
+						
+                       	$("span[name='delete']").click(function(){$(this).parents("tr").remove();
+						alert('删除1个稿件');
+						});
+                        </script>
+						</div>
+					</div>
+					
+					
+					</div>
+					
+				</form>
+		</div>
+	</div>
+                 
+			</div>
+    
+    
+    </div>
+	
+	<div data-options="region:'center',title:'导入word'">
+    <!-- 编辑器 -->
+			<div id="left" style="width:100%;height:100%;">
+				<script id="editor" type="text/plain" style="width:99.5%;margin:5px 5px 0 5px;"> 
+                
+                </script> 
+			</div>
+    
+    </div>
+    
+</body>
+</html>
